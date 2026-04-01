@@ -14,21 +14,15 @@ class Tensor {
 
 
 public:
-    Tensor();
+    Tensor(); // constuctor default
 
-    Tensor(const vector<size_t>& shape, const vector<double>& values);
+    Tensor(const vector<size_t>& shape, const vector<double>& values); // constructor normal
 
-    Tensor(const Tensor& other);                  // copia
+    Tensor(const Tensor& otro);                  // copia
     Tensor& operator=(const Tensor& other);       // asignación copia
     Tensor(Tensor&& other);              // movimiento
     Tensor& operator=(Tensor&& other);   // asignación movimiento
     ~Tensor();                                    // destructor
-
-    // Getters
-    const std::vector<size_t>& shape() const;
-    size_t size() const;
-    const double* data() const;
-    double* data();
 
     void print_info() const;
 };

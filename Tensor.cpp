@@ -22,3 +22,34 @@ size_t Tensor::compute_total_size(const vector<size_t>& shape) {
 
 Tensor::Tensor() : shape_{0}, total_size_(0), data_(nullptr) {}
 
+
+// Constructor de copia
+Tensor::Tensor(const Tensor& otro)
+    : shape_(otro.shape_), total_size_(otro.total_size_), data_(nullptr) {
+
+    if (otro.data_ != nullptr) {
+        data_ = new double[total_size_];
+        for (size_t i = 0; i < total_size_; ++i) {
+            data_[i] = otro.data_[i];
+        }
+    }
+}
+
+// Constructor de movimiento
+Tensor::Tensor(Tensor&& other)
+    : shape_(std::move(other.shape_)),
+      total_size_(other.total_size_),
+      data_(other.data_) {
+
+    other.total_size_ = 0;
+    other.data_ = nullptr;
+}
+
+
+// Destructor
+
+Tensor::~Tensor() {
+    delete[] data_;
+}
+
+
