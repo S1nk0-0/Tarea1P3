@@ -2,6 +2,5 @@
 using namespace std;
 
 int main(){
-    // me quiero ir bro
-
+    class Tensor
 }
