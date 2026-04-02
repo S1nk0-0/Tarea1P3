@@ -25,6 +25,13 @@ public:
     ~Tensor();                                    // destructor
 
     void print_info() const;
+
+    // Funciones
+
+    static Tensor zeros(const std::vector<size_t>& shape);
+    static Tensor ones(const std::vector<size_t>& shape);
+    static Tensor random(const std::vector<size_t>& shape, double min, double max);
+    static Tensor arange(int start, int end);
 };
 
 
