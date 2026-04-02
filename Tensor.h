@@ -3,7 +3,7 @@
 #include "iostream"
 #include "string"
 #include "vector"
-class TensorTransform; //Para que no ocurra una llamada de archivos continua
+class TensorTranform; //Para que no ocurra una llamada de archivos continua
 using namespace std;
 
 //size_t utilizado para representar tamaños de objetos y contadores de elementos
@@ -28,7 +28,7 @@ public:
     ~Tensor();                                    // Destructor
 
     //Para hacer una tranformacion al tensor
-    Tensor apply(const TensorTransform& transform) const;
+    Tensor apply(const TensorTranform& tranform) const;
     //Se reciba una referencia a culaquier cosa que herede de TensorTranform
 
     //   void print_info() const;

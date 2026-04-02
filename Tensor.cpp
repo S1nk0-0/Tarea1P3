@@ -195,8 +195,8 @@ const double* Tensor::get_data() const {
 }
 
 //Permite el polimorfismo dinamico
-Tensor Tensor::apply(const TensorTransform& transform) const {
-    return transform.apply(*this); //Nos devuelve un nuevo tensor tranformado
+Tensor Tensor::apply(const TensorTranform& tranform) const {
+    return tranform.apply(*this); //Nos devuelve un nuevo tensor tranformado
 
 }
 
