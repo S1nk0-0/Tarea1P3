@@ -3,6 +3,7 @@
 #include "iostream"
 #include "string"
 #include "vector"
+class TensorTransform; //Para que no ocurra una llamada de archivos continua
 using namespace std;
 
 //size_t utilizado para representar tamaños de objetos y contadores de elementos
@@ -26,13 +27,22 @@ public:
     Tensor& operator=(Tensor&& other);   // Operador de asignación de movimiento
     ~Tensor();                                    // Destructor
 
-    void print_info() const;
+    //Para hacer una tranformacion al tensor
+    Tensor apply(const TensorTransform& transform) const;
+    //Se reciba una referencia a culaquier cosa que herede de TensorTranform
+
+    //   void print_info() const;
 
     // Funciones
     static Tensor zeros(const std::vector<size_t>& shape); //Inicializa en ceros
     static Tensor ones(const std::vector<size_t>& shape); //Inicializa en unos
     static Tensor random(const std::vector<size_t>& shape, double min, double max); //Nos da valores randoms
-    static Tensor arange(int start, int end); //
+    static Tensor arange(int start, int end); //Para definir el rango
+    //Getters
+    size_t get_totaln() const;
+    size_t get_dimensiones() const;
+    const size_t* get_shape() const;
+    const double* get_data() const;
 };
 
 
