@@ -97,6 +97,7 @@ Tensor& Tensor::operator=(const Tensor& other) {
     else {
         data = nullptr;
     }
+    return *this;
 }
 
 // Constructor de movimiento
@@ -151,41 +152,52 @@ Tensor Tensor::ones(const vector<size_t>& shape) {
     vector<double> values(total, 1.0);
     return Tensor(shape, values);
 }
-
-Tensor Tensor::random(const vector<size_t>& shape, double min, double max) {
+//Funcion para valores aleatorios
+Tensor Tensor::random(const vector<size_t>& shape,double min,double max) { //Puede tomar decimales
     if (min >= max) {
-        throw invalid_argument("min debe ser menor que max."); //min entero y tambien considerar negativos
+        throw invalid_argument("min debe ser menor que max.");
     }
-
     size_t total = compute_total_size(shape);
     vector<double> values(total);
-
-    if (min >= 0) {
-        for (size_t i = 0; i < total; ++i) {
-            values[i] = rand() % (max-min) +min ; //Codigo mal porque % solo sirve para enteros
-            //Formula que se debe implementar random = min + (rand()/RAND_MAX)*(max-min)
-        }
-    }
-    else {
-        throw invalid_argument("min debe ser positivo.");
-    }
-
-
-    return Tensor(shape, values);
+    for (size_t i = 0; i < total; ++i) {
+        double r = double(rand()) / RAND_MAX; //Formamos un numero aleatorio decimal que va desde 0 a 1
+        //RAND_MAX garantiza que sea un valor al menos de 32767
+        values[i] = min + r* (max - min); //Convierte esto en un intervalo que va desde min a maximo
+    }//Sumamos el min para desplazar el intervalo
+    //Se mide la distancia entre max y min esta distancia lo multiplicamos por un valor aleatorio entre 0-1
+    //Le añadimos lo faltante osea desplazamos min (cantidad) y asi formamos numeros aleatorios que tambien pueden ser negativos
+    return Tensor(shape, values);//Retorna el tensor
 }
-
+//Funcion para considerar el rango
 Tensor Tensor::arange(int start, int end){
     if (start >= end) {
         throw invalid_argument("start debe ser menor que end.");
     }
     vector<double> values;
-
     for (int i = start; i < end; ++i) {
-        values.push_back(i);
+        values.push_back(i);//Pone los valores en el tensor
     }
-
     vector<size_t> shape = { values.size() };
     return Tensor(shape, values);
+}
+//Getters
+size_t Tensor::get_totaln() const {
+    return totaln;
+}
+size_t Tensor::get_dimensiones() const {
+    return dimensiones;
+}
+const size_t* Tensor::get_shape() const {
+    return shape;
+}
+const double* Tensor::get_data() const {
+    return data;
+}
+
+//Permite el polimorfismo dinamico
+Tensor Tensor::apply(const TensorTransform& transform) const {
+    return transform.apply(*this); //Nos devuelve un nuevo tensor tranformado
+
 }
 
 
