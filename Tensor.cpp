@@ -101,7 +101,7 @@ Tensor& Tensor::operator=(const Tensor& other) {
 }
 
 // Constructor de movimiento
-Tensor::Tensor(Tensor&& other) {
+Tensor::Tensor(Tensor&& other) noexcept {
     dimensiones = other.dimensiones; //copiar el puntero
     totaln = other.totaln;
     shape = other.shape;
@@ -114,7 +114,7 @@ Tensor::Tensor(Tensor&& other) {
 
 //Operador de asignacion de movimiento
 //Misma memoria pero se cambia el tensor a uno nuevo que recibiremos
-Tensor& Tensor::operator=(Tensor&& other) {
+Tensor& Tensor::operator=(Tensor&& other) noexcept{
     if (this == &other) { //que no sean iguales ambos tensores
         return *this;
     }
@@ -204,12 +204,12 @@ Tensor Tensor::apply(const TensorTranform& tranform) const {
 Tensor Tensor::operator+(const Tensor& other) const {
     // Verificar shapes que tengan las mismas dimensiones
     if (dimensiones != other.dimensiones) {
-        throw invalid_argument("Dimensiones incompatibles");
+        throw invalid_argument("Dimensiones incompatibles.");
     }
     //Verificar que tenga las mismas filas columnas y en caso 3D alto
     for (size_t i = 0; i < dimensiones; i++) {
         if (shape[i] != other.shape[i]) {
-            throw invalid_argument("Shapes diferentes");
+            throw invalid_argument("Shapes diferentes.");
         }
     }
     // Crear el resultado
@@ -225,12 +225,12 @@ Tensor Tensor::operator+(const Tensor& other) const {
 Tensor Tensor::operator-(const Tensor& other) const {
     // Verificar shapes que tengan las mismas dimensiones
     if (dimensiones != other.dimensiones) {
-        throw invalid_argument("Dimensiones incompatibles");
+        throw invalid_argument("Dimensiones incompatibles.");
     }
     //Verificar que tenga las mismas filas columnas y en caso 3D alto
     for (size_t i = 0; i < dimensiones; i++) {
         if (shape[i] != other.shape[i]) {
-            throw invalid_argument("Shapes diferentes");
+            throw invalid_argument("Shapes diferentes.");
         }
     }
     // Crear el resultado
@@ -256,102 +256,76 @@ Tensor Tensor::operator*(const double valor) const {
 }
 
 Tensor Tensor::operator*(const Tensor& other) const {
-    //Si los sensores son de 1 dimension ocurre lo siguiente
-    if (dimensiones == 1 && other.dimensiones == 1) {
-        if (shape[0] != other.shape[0]) {
-            throw invalid_argument("Los vectores de 1 dimension deben tener el mismo tamaño");
-        }
-        double producto_punto = 0;
-        size_t tamaño = shape[0];
-        for (size_t i = 0; i < tamaño; i++) {
-            producto_punto += data[i] * other.data[i];
-        }
-
-        // Formamos nuestro tensor que retornaremos
-        vector<size_t> new_shape = {1};
-        vector<double> result = {producto_punto};
-        //retornamos el tensor que queremos
-        return Tensor(new_shape, result);
+    // Verificar shapes que tengan las mismas dimensiones
+    if (dimensiones != other.dimensiones) {
+        throw invalid_argument("Dimensiones incompatibles.");
     }
-
-
-    //Si los tensores son de dos dimensiones ocurre lo siguiente
-    if (dimensiones == 2 && other.dimensiones == 2) {
-        //Se asignas filas y columnas para hacer la multiplicacion
-        size_t filasA = shape[0];
-        size_t columnasA  = shape[1];
-        size_t filasB = other.shape[0];
-        size_t columnasB  = other.shape[1];
-        // Verificar  para ver si se cumple la condicion de multiplicacion
-        if (columnasA != filasB) {
-            throw invalid_argument("No se pueden multiplicar estas matrices");
+    //Verificar que tenga las mismas filas columnas y en caso 3D alto
+    for (size_t i = 0; i < dimensiones; i++) {
+        if (shape[i] != other.shape[i]) {
+            throw invalid_argument("Shapes diferentes.");
         }
-        // Crear para retornar resultado
-        vector<size_t> new_shape = {filasA, columnasB};
-        vector<double> result(filasA * columnasB, 0.0);
-        // Multiplicación
-        for (size_t i = 0; i < filasA; i++) {
-            for (size_t j = 0; j < columnasB; j++) {
-                double suma = 0; //Suma acumulativa
-                for (size_t k = 0; k < columnasA; k++) {
-                    suma +=data[i * columnasA + k] *other.data[k * columnasB + j];
-                }
-                //Se guarda en un vector 1D
-                //Se accede a la posicion y se guarda la suma correspondiente
-                result[i * columnasB + j] = suma;
-            }
-        }
-        //retorna el resultado
-        return Tensor(new_shape, result);
     }
-    //Si los tensores son de 3 dimensiones ocurre lo siguiente
-    if (dimensiones == 3 && other.dimensiones == 3) {
-        size_t alturaA = shape[0];
-        size_t filasA = shape[1];
-        size_t columnasA = shape[2];
-
-        size_t alturaB = other.shape[0];
-        size_t filasB = other.shape[1];
-        size_t columnasB = other.shape[2];
-
-        // Se verifica
-        if (alturaA != alturaB) {
-            throw invalid_argument("Los tensores 3D deben tener la misma cantidad de lotes (altura)");
-        }
-        if (columnasA != filasB) {
-            throw invalid_argument("Las dimensiones internas de las matrices en el lote no coinciden");
-        }
-        //Se hace esto porque se hara multiplicacion de matrices para cada parte de altura
-        vector<size_t> new_shape = {alturaA, filasA, columnasB};
-        vector<double> result(alturaA * filasA * columnasB, 0.0);
-        //Se crea los valores que luego retornaremos
-
-        // Tamaños de bloque para saber cuántos elementos saltar por cada parte de altura
-        size_t sizeMatrizA = filasA * columnasA;
-        size_t sizeMatrizB = filasB * columnasB;
-        size_t sizeMatrizResult = filasA * columnasB; //Esta sera el tamaño para todas aquella matrices que operemos
-
-        // Recorremos los lotes
-        for (size_t a = 0; a < alturaA; a++) {
-            // Multiplicacion de matrices como en 2D
-            for (size_t i = 0; i < filasA; i++) {
-                for (size_t j = 0; j < columnasB; j++) {
-                    double suma = 0;
-                    for (size_t k = 0; k < columnasA; k++) {
-                        double valorA = data[a * sizeMatrizA + (i * columnasA + k)];
-                        double valorB = other.data[a * sizeMatrizB + (k * columnasB + j)];
-                        suma += valorA * valorB;
-                    }
-                    //Se coloca esa suma en la posicion correspondiente
-                    result[a* sizeMatrizResult + (i * columnasB + j)] = suma;
-                }
-            }
-        }
-        //Retorna el nuevo tensor
-        return Tensor(new_shape, result);
+    // Crear el resultado
+    vector<double> result(totaln);
+    // Restar elemento a elemento
+    for (size_t i = 0; i < totaln; i++) {
+        result[i] = data[i] * other.data[i];
     }
+    vector<size_t> new_shape(shape, shape + dimensiones);
+    //Retornar el nuevo tensor
+    return Tensor(new_shape, result);
+}
 
-    // Por si se intentan multiplicar dimensiones que no son compatibles
-    throw invalid_argument("Multiplicacion no compatible para estas dimensiones");
+Tensor::view(const vector<size_t>& new_shape) {
+    // Validamos que no sea mas de 3 dimensiones
+    if (new_shape.empty() || new_shape.size() > 3) {
+        throw invalid_argument("El shape debe tener entre 1 y 3 dimensiones.");
+    }
+    //Calcumaos el tamaño de el tensor que queremos
+    size_t nuevo_totaln = 1;
+    for (size_t dim : new_shape) {
+        if (dim == 0) throw invalid_argument("La dimension no puede ser 0.");
+        nuevo_totaln *= dim;
+    }
+    //Verificamos que el total de elementos sea constante
+    if (nuevo_totaln != this->totaln) {
+        throw invalid_argument("El numero total de elementos no coincide.");
+    }
+    //Creamos un tensor que luego retornaremos
+    Tensor result;
+    result.dimensiones = new_shape.size();
+    result.totaln = this->totaln;
+    //Asignamos valores a nuestro nuevo tensor que queremos
+    result.shape = new size_t[result.dimensiones];
+    for (size_t i = 0; i < result.dimensiones; ++i) {
+        result.shape[i] = new_shape[i];
+    }
+    // Accedemos al puntero : "no lo copiamos"
+    result.data = this->data;
+    // Dejamos el tensor original en un estado vacio
+    delete[] this->shape; // Liberamos memoria
+    this->shape = nullptr;
+    this->data = nullptr;
+    this->dimensiones = 0;
+    this->totaln = 0;
+    // Retorna el nuevo tensor
+    return result;
+}
 
+Tensor Tensor::unsqueeze(size_t dim) {
+    //Verficamos dimensiones
+    if (dimensiones >= 3) {
+        throw invalid_argument("No se puede hacer unsqueeze, excede el maximo de 3 dimensiones.");
+    }
+    //Validamos que la dimension sea la correcta
+    if (dim > dimensiones) {
+        throw out_of_range("La dimension especificada esta fuera de rango.");
+    }
+    //Construimos nuestro nuevo shape a base del anterior
+    vector<size_t> new_shape(shape, shape + dimensiones);
+    //Insertamos un 1 en la posicion que queremos
+    new_shape.insert(new_shape.begin() + dim, 1);
+    //Utilizamos view para hacer la tranferencia de memoria sin copiar
+    return this->view(new_shape);
 }

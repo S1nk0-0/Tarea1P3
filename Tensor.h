@@ -23,8 +23,8 @@ public:
     Tensor(const vector <size_t>& shape, const vector<double>& values); // Constructor principal
     Tensor(const Tensor& otro);                  // Constructor de copia
     Tensor& operator=(const Tensor& other);       // Operador de asignación de copia
-    Tensor(Tensor&& other);              // Constructor de movimiento
-    Tensor& operator=(Tensor&& other);   // Operador de asignación de movimiento
+    Tensor(Tensor&& other) noexcept;              // Constructor de movimiento
+    Tensor& operator=(Tensor&& other) noexcept;   // Operador de asignación de movimiento
     ~Tensor();                                    // Destructor
 
     //Para hacer una tranformacion al tensor
@@ -34,9 +34,9 @@ public:
     //   void print_info() const;
 
     // Funciones
-    static Tensor zeros(const std::vector<size_t>& shape); //Inicializa en ceros
-    static Tensor ones(const std::vector<size_t>& shape); //Inicializa en unos
-    static Tensor random(const std::vector<size_t>& shape, double min, double max); //Nos da valores randoms
+    static Tensor zeros(const vector<size_t>& shape); //Inicializa en ceros
+    static Tensor ones(const vector<size_t>& shape); //Inicializa en unos
+    static Tensor random(const vector<size_t>& shape, double min, double max); //Nos da valores randoms
     static Tensor arange(int start, int end); //Para definir el rango
     //Getters
     size_t get_totaln() const;
@@ -45,13 +45,17 @@ public:
     const double* get_data() const;
     //Sobrecarga de Operadores
     //Sobrecarga de operador +
-    Tensor operator+(const Tensor& otro);
+    Tensor operator+(const Tensor& otro) const;
     //Sobrecarga de operador -
     Tensor operator-(const Tensor& other) const;
     //Sobrecarga de operador * con un valor
     Tensor operator*(double valor) const;
     //Sobrecarga de operador * con otro tensor
     Tensor operator*(const Tensor& other) const;
+
+    //Modificacion de dimensiones
+    Tensor view(const vector<size_t>& new_shape);
+    Tensor unsqueeze(size_t dim);
 };
 
 
