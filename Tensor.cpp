@@ -329,3 +329,111 @@ Tensor Tensor::unsqueeze(size_t dim) {
     //Utilizamos view para hacer la tranferencia de memoria sin copiar
     return this->view(new_shape);
 }
+
+Tensor Tensor::concat(const std::vector<Tensor>& tensores, size_t dim) {
+    //Validacion de tener al menos un tensor en la lista
+    if (tensores.empty()) {
+        throw invalid_argument("La lista de tensores esta vacia. Se requiere al menos un tensor.");
+    }
+    //Accedemos a la dimension
+    size_t dims = tensores[0].get_dimensiones();
+
+    // Verificamos que todos los tensores en la lista tengan la misma cantidad de dimensiones (1D, 2D o 3D)
+    for (const Tensor& t : tensores) {
+        if (t.get_dimensiones() != dims) {
+            throw invalid_argument("Todos los tensores deben tener el mismo numero de dimensiones para concatenarse.");
+        }
+    }
+    // Validación
+    if (dim >= dims) {
+        throw invalid_argument("La dimension especificada no es valida para estos tensores (ejemplo: dim=1 en un vector 1D).");
+    }
+    // Creamos el nuevo shape que luego retornaremos y validamos matematicamente
+    // Tomamos el shape del primer tensor como base para comparar
+    vector<size_t> base_shape(tensores[0].get_shape(), tensores[0].get_shape() + dims);
+    vector<size_t> new_shape = base_shape;
+
+    // Iteramos desde el segundo tensor en adelante para validar con el primero
+    for (size_t i = 1; i < tensores.size(); ++i) {
+        const size_t* curr_shape = tensores[i].get_shape();
+        if (dims == 1) {
+            //Caso de 1D
+        }
+        else if (dims == 2) {
+            // CASO de 2D:
+            if (dim == 0) {
+                // Tensor A <a,b> y Tensor B <c,b> -> Resultado <a+c, b> se requiere esta condicion
+                if (curr_shape[1] != base_shape[1]) {
+                    throw invalid_argument("2D (dim=0): Las columnas <b> deben coincidir para apilar verticalmente.");
+                }
+            } else if (dim == 1) {
+                // Tensor A <a,b> y Tensor B <a,c> -> Resultado <a, b+c> se requiere esta condicion
+                if (curr_shape[0] != base_shape[0]) {
+                    throw invalid_argument("2D (dim=1): Las filas <a> deben coincidir para apilar horizontalmente.");
+                }
+            }
+        }
+        else if (dims == 3) {
+            // CASO 3D:
+            if (dim == 0) {
+                // Concatenar por Altura
+                // Tensor A <a,b,c> y Tensor B <d,b,c> -> Resultado <a+d, b, c> se requiere esta condicion
+                if (curr_shape[1] != base_shape[1] || curr_shape[2] != base_shape[2]) {
+                    throw invalid_argument("3D (dim=0, altura): La profundidad <b> y longitud <c> deben coincidir.");
+                }
+            } else if (dim == 1) {
+                // Concatenar por Profundidad
+                // Tensor A <a,b,c> y Tensor B <a,d,c> -> Resultado <a, b+d, c> se requiere esta condicion
+                if (curr_shape[0] != base_shape[0] || curr_shape[2] != base_shape[2]) {
+                    throw invalid_argument("3D (dim=1, profundidad): La altura <a> y longitud <c> deben coincidir.");
+                }
+            } else if (dim == 2) {
+                // Concatenar por Longitud se requiere esta condicion
+                // Tensor A <a,b,c> y Tensor B <a,b,d> -> Resultado <a, b, c+d>
+                if (curr_shape[0] != base_shape[0] || curr_shape[1] != base_shape[1]) {
+                    throw invalid_argument("3D (dim=2, longitud): La altura <a> y profundidad <b> deben coincidir.");
+                }
+            }
+        }
+        // Si esq pasó las validaciones, sumamos el tamaño en la dimensión objetivo
+        new_shape[dim] += curr_shape[dim];
+    }
+    // Creamos la nueva memoria
+    // Calculamos el total de elementos de la matriz concatenada
+    size_t nuevo_totaln = 1;
+    for (size_t s : new_shape) {
+        nuevo_totaln *= s;
+    }
+    // Creamos el vector que almacenará los nuevos datos
+    vector<double> result_data(nuevo_totaln, 0.0);
+    //Saltos de data
+    //Repeticiones = Producto de todas las dimensiones antes de 'dim'
+    //Ciclo completo de saltos = a repeticiones
+    size_t repeticiones = 1;
+    for (size_t i = 0; i < dim; ++i) {
+        repeticiones *= new_shape[i];
+    }
+    size_t offset_escritura = 0; // Puntero virtual para saber dónde escribir en result_data osea le dice al programa el numero que esta aqui
+    //ponlo en la posicion 0 luego el otro en posicion 1 ...
+    //Veces que hacemos el intercambio
+    for (size_t r = 0; r < repeticiones; ++r) {
+        //Pasamos por cada uno de los tensores de la lista y hacemos esto repetidamente
+        for (const Tensor& t : tensores) {
+            // Tamaño del bloque (cuantos elementos seguidos tomamos de este tensor en especifico)
+            // Total de elementos del tensor actual dividido entre las repeticiones
+            //bloque = a los numeros que copiamos de un tensor antes de seguir copiando cuando saltamos al otro tensor
+            size_t bloque_t = t.get_totaln() / repeticiones;
+            // Puntero virtual para saber desde dónde leer en el tensor actual
+            size_t offset_lectura = r * bloque_t; //Nos sirve para considerar los saltos y no copiar un valor de mas o
+            //no saltarnos algun valor
+            const double* t_data = t.get_data();
+            // Copiamos el bloque de datos a la nueva memoria donde vamos a almacenar todo
+            for (size_t i = 0; i < bloque_t; ++i) {
+                result_data[offset_escritura] = t_data[offset_lectura + i];
+                offset_escritura++;
+            }
+        }
+    }
+    // Finalmente, construimos y retornamos el nuevo Tensor
+    return Tensor(new_shape, result_data);
+}

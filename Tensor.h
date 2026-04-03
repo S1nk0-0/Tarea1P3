@@ -38,6 +38,7 @@ public:
     static Tensor ones(const vector<size_t>& shape); //Inicializa en unos
     static Tensor random(const vector<size_t>& shape, double min, double max); //Nos da valores randoms
     static Tensor arange(int start, int end); //Para definir el rango
+    static Tensor concat(const std::vector<Tensor>& tensores, size_t dim); //Para concatenar tensores
     //Getters
     size_t get_totaln() const;
     size_t get_dimensiones() const;
