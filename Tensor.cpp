@@ -199,5 +199,91 @@ Tensor Tensor::apply(const TensorTranform& tranform) const {
     return tranform.apply(*this); //Nos devuelve un nuevo tensor tranformado
 
 }
+//Sobrecarga de Operadores
+//Sobrecarga de +
+Tensor Tensor::operator+(const Tensor& other) const {
+    // Verificar shapes que tengan las mismas dimensiones
+    if (dimensiones != other.dimensiones) {
+        throw invalid_argument("Dimensiones incompatibles");
+    }
+    //Verificar que tenga las mismas filas columnas y en caso 3D alto
+    for (size_t i = 0; i < dimensiones; i++) {
+        if (shape[i] != other.shape[i]) {
+            throw invalid_argument("Shapes diferentes");
+        }
+    }
+    // Crear el resultado
+    vector<double> result(totaln);
+    // Sumar elemento a elemento
+    for (size_t i = 0; i < totaln; i++) {
+        result[i] = data[i] + other.data[i];
+    }
+    vector<size_t> new_shape(shape, shape + dimensiones);
+    //Retornar el nuevo tensor
+    return Tensor(new_shape, result);
+}
+Tensor Tensor::operator-(const Tensor& other) const {
+    // Verificar shapes que tengan las mismas dimensiones
+    if (dimensiones != other.dimensiones) {
+        throw invalid_argument("Dimensiones incompatibles");
+    }
+    //Verificar que tenga las mismas filas columnas y en caso 3D alto
+    for (size_t i = 0; i < dimensiones; i++) {
+        if (shape[i] != other.shape[i]) {
+            throw invalid_argument("Shapes diferentes");
+        }
+    }
+    // Crear el resultado
+    vector<double> result(totaln);
+    // Restar elemento a elemento
+    for (size_t i = 0; i < totaln; i++) {
+        result[i] = data[i] - other.data[i];
+    }
+    vector<size_t> new_shape(shape, shape + dimensiones);
+    //Retornar el nuevo tensor
+    return Tensor(new_shape, result);
+}
+Tensor Tensor::operator*(const double valor) const {
+    // Crear el resultado
+    vector<double> result(totaln);
+    // Multiplicar fila por columna
+    for (size_t i = 0; i < totaln; i++) {
+        result[i] = data[i] * valor; //Se multiplica por el valor que se hace
+    }
+    vector<size_t> new_shape(shape, shape + dimensiones);
+    //Retornar el nuevo tensor
+    return Tensor(new_shape, result);
+}
 
-
+Tensor Tensor::operator*(const Tensor& other) const {
+    // Verificar que ambos sean matrices 2D
+    if (dimensiones != 2 || other.dimensiones != 2) {
+        throw invalid_argument("Solo matrices 2D permitidas");
+    }
+    //Se asignas filas y columnas para hacer la multiplicacion
+    size_t filasA = shape[0];
+    size_t columnasA  = shape[1];
+    size_t filasB = other.shape[0];
+    size_t columnasB  = other.shape[1];
+    // Verificar  para ver si se cumple la condicion de multiplicacion
+    if (columnasA != filasB) {
+        throw invalid_argument("No se pueden multiplicar estas matrices");
+    }
+    // Crear para retornar resultado
+    vector<size_t> new_shape = {filasA, columnasB};
+    vector<double> result(filasA * columnasB, 0.0);
+    // Multiplicación
+    for (size_t i = 0; i < filasA; i++) {
+        for (size_t j = 0; j < columnasB; j++) {
+            double suma = 0; //Suma acumulativa
+            for (size_t k = 0; k < columnasA; k++) {
+                suma +=data[i * columnasA + k] *other.data[k * columnasB + j];
+            }
+            //Se guarda en un vector 1D
+            //Se accede a la posicion y se guarda la suma correspondiente
+            result[i * columnasB + j] = suma;
+        }
+    }
+    //retorna el resultado
+    return Tensor(new_shape, result);
+}

@@ -43,6 +43,15 @@ public:
     size_t get_dimensiones() const;
     const size_t* get_shape() const;
     const double* get_data() const;
+    //Sobrecarga de Operadores
+    //Sobrecarga de operador +
+    Tensor operator+(const Tensor& otro);
+    //Sobrecarga de operador -
+    Tensor operator-(const Tensor& other) const;
+    //Sobrecarga de operador * con un valor
+    Tensor operator*(double valor) const;
+    //Sobrecarga de operador * con otro tensor
+    Tensor operator*(const Tensor& other) const;
 };
 
 
