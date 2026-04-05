@@ -170,7 +170,6 @@ Tensor::~Tensor()   {
 }
 
 
-
 //Funcion para valores aleatorios
 Tensor Tensor::random(const vector<size_t>& shape,double min,double max) { //Puede tomar decimales
     if (min >= max) {
@@ -443,4 +442,54 @@ Tensor Tensor::concat(const std::vector<Tensor>& tensores, size_t dim) {
     }
     // Finalmente, construimos y retornamos el nuevo Tensor
     return Tensor(new_shape, result_data);
+}
+
+Tensor dot(const Tensor& a, const Tensor& b) {
+    //Verficamos dimensiones
+    if (a.dimensiones !=  b.dimensions) {
+        throw invalid_argument("No se puede hacer dot, dimensiones diferentes.");
+    }
+    //Verficamos shape
+    for (size_t i = 0; i < a.dimensiones; ++i) {
+        if (a.shape[i] != b.shape[i]) {
+            throw invalid_argument("No se puede hacer dot, shape incompatibles.");
+        }
+    }
+
+    double suma = 0.0;
+    for (size_t i = 0; i < a.totaln; ++i) {
+        suma += a.data[i] * b.data[i];
+    }
+    return move(Tensor({1}, {suma}));
+}
+
+Tensor matmul(const Tensor& a, const Tensor& b) {
+    // validar que ambos sean 2D
+
+    //Verficamos dimensiones
+    if (a.dimensiones != 2 &  b.dimensions != 2) {
+        throw invalid_argument("No se puede hacer matmul, dimensiones diferentes a 2D.");
+    }
+    // validar que a.shape[1] == b.shape[0]
+    if (a.shape[1] != b.shape[1]) {
+        throw invalid_argument("No se puede hacer matmul, tamanios incompatibles.");
+    }
+
+        size_t m = a.shape[0];
+        size_t n = a.shape[1]; // a.shape[1] == b.shape[0]
+        size_t p = b.shape[1];
+
+        vector<double> result(m * p, 0.0);
+
+
+        //Formula: Resultado[i][j] = sum desde 0 a n-1 (A[i][k] * B[k][j]
+        for (size_t i = 0; i < m; ++i) { // que fila calculamos
+            for (size_t j = 0; j < p; ++j) { // que columna calculamos
+                for (size_t k = 0; k < n; ++k) { // avanzamos por la fila i y columna j, multiplicando y acomulando
+                    result[i * p + j] += a.data[i * n + k] * b.data[k * p + j];
+                }
+            }
+        }
+
+    return move(Tensor({m, p}, result));
 }
