@@ -4,7 +4,7 @@
 #include "string"
 #include "vector"
 class TensorTranform; //Para que no ocurra una llamada de archivos continua
-using namespace std;
+using namespace std;//n
 
 //size_t utilizado para representar tamaños de objetos y contadores de elementos
 

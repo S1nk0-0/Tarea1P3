@@ -319,7 +319,7 @@ Tensor Tensor::view(const vector<size_t>& new_shape)  {
     return result;
 }
 
-Tensor Tensor::unsqueeze(size_t dim) const {
+Tensor Tensor::unsqueeze(size_t dim) {
     //Verficamos dimensiones
     if (dimensiones >= 3) {
         throw invalid_argument("No se puede hacer unsqueeze, excede el maximo de 3 dimensiones.");
@@ -446,7 +446,7 @@ Tensor Tensor::concat(const std::vector<Tensor>& tensores, size_t dim) {
 
 Tensor dot(const Tensor& a, const Tensor& b) {
     //Verficamos dimensiones
-    if (a.dimensiones !=  b.dimensions) {
+    if (a.dimensiones !=  b.dimensiones) {
         throw invalid_argument("No se puede hacer dot, dimensiones diferentes.");
     }
     //Verficamos shape
@@ -457,7 +457,7 @@ Tensor dot(const Tensor& a, const Tensor& b) {
     }
 
     double suma = 0.0;
-    for (size_t i = 0; i < a.totaln; ++i) {
+    for (size_t i = 0; i < a.totaln; ++i) { // multiplicamos los valores
         suma += a.data[i] * b.data[i];
     }
     return move(Tensor({1}, {suma}));
@@ -467,7 +467,7 @@ Tensor matmul(const Tensor& a, const Tensor& b) {
     // validar que ambos sean 2D
 
     //Verficamos dimensiones
-    if (a.dimensiones != 2 &  b.dimensions != 2) {
+    if (a.dimensiones != 2 &  b.dimensiones != 2) {
         throw invalid_argument("No se puede hacer matmul, dimensiones diferentes a 2D.");
     }
     // validar que a.shape[1] == b.shape[0]
