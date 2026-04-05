@@ -467,16 +467,16 @@ Tensor matmul(const Tensor& a, const Tensor& b) {
     // validar que ambos sean 2D
 
     //Verficamos dimensiones
-    if (a.dimensiones != 2 &  b.dimensiones != 2) {
+    if (a.dimensiones != 2  || b.dimensiones != 2) {
         throw invalid_argument("No se puede hacer matmul, dimensiones diferentes a 2D.");
     }
     // validar que a.shape[1] == b.shape[0]
-    if (a.shape[1] != b.shape[1]) {
+    if (a.shape[1] != b.shape[0]) {
         throw invalid_argument("No se puede hacer matmul, tamanios incompatibles.");
     }
 
         size_t m = a.shape[0];
-        size_t n = a.shape[1]; // a.shape[1] == b.shape[0]
+        size_t n = a.shape[1]; // == b.shape[0]
         size_t p = b.shape[1];
 
         vector<double> result(m * p, 0.0);

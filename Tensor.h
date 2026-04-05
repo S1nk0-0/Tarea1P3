@@ -13,6 +13,7 @@ class Tensor {
     friend Tensor dot ( const Tensor & a , const Tensor & b ) ;
     friend Tensor matmul ( const Tensor & a , const Tensor & b ) ;
 
+    friend ostream& operator<<(ostream& os, const Tensor& t);
     //Atributos
     size_t* shape; //Guarda dimensiones del tensor -- Array dinamico
     size_t dimensiones; //Numero de dimensiones que tiene el tensor
