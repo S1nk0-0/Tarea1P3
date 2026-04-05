@@ -9,6 +9,7 @@ using namespace std;
 //size_t utilizado para representar tamaños de objetos y contadores de elementos
 
 class Tensor {
+
     //Atributos
     size_t* shape; //Guarda dimensiones del tensor -- Array dinamico
     size_t dimensiones; //Numero de dimensiones que tiene el tensor
@@ -57,6 +58,8 @@ public:
     //Modificacion de dimensiones
     Tensor view(const vector<size_t>& new_shape);
     Tensor unsqueeze(size_t dim);
+
+
 };
 
 

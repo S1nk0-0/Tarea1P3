@@ -1,4 +1,5 @@
 #include "Tensor.h"
+#include "TensorTranform.h"
 using namespace std;
 //Funcion para manejo de errores
 size_t Tensor::compute_total_size(const vector<size_t>& shape) { //Para evitar errores
@@ -147,26 +148,6 @@ Tensor Tensor::ones(const vector<size_t>& shape) {
     return Tensor(shape, values);
 }
 
-Tensor Tensor::random(const vector<size_t>& shape, double min, double max) {
-    if (min >= max) {
-        throw invalid_argument("min debe ser menor que max.");
-    }
-
-    size_t total = compute_total_size(shape);
-    vector<double> values(total);
-
-    if (min >= 0) {
-        for (size_t i = 0; i < total; ++i) {
-            values[i] = rand() % (max-min) +min ;
-        }
-    }
-    else {
-        throw invalid_argument("min debe ser positivo.");
-    }
-
-
-    return Tensor(shape, values);
-}
 
 Tensor Tensor::arange(int start, int end) {
     if (start >= end) {
@@ -188,18 +169,8 @@ Tensor::~Tensor()   {
     delete[] data;
 }
 
-// Funciones
-Tensor Tensor::zeros(const vector<size_t>& shape) {
-    size_t total = compute_total_size(shape);
-    vector<double> values(total, 0.0);
-    return Tensor(shape, values);
-}
 
-Tensor Tensor::ones(const vector<size_t>& shape) {
-    size_t total = compute_total_size(shape);
-    vector<double> values(total, 1.0);
-    return Tensor(shape, values);
-}
+
 //Funcion para valores aleatorios
 Tensor Tensor::random(const vector<size_t>& shape,double min,double max) { //Puede tomar decimales
     if (min >= max) {
@@ -208,7 +179,7 @@ Tensor Tensor::random(const vector<size_t>& shape,double min,double max) { //Pue
     size_t total = compute_total_size(shape);
     vector<double> values(total);
     for (size_t i = 0; i < total; ++i) {
-        double r = double(rand()) / RAND_MAX; //Formamos un numero aleatorio decimal que va desde 0 a 1
+        double r = double(rand()) / (RAND_MAX+1.0); //Formamos un numero aleatorio decimal que va desde [0, 1)
         //RAND_MAX garantiza que sea un valor al menos de 32767
         values[i] = min + r* (max - min); //Convierte esto en un intervalo que va desde min a maximo
     }//Sumamos el min para desplazar el intervalo
@@ -216,18 +187,7 @@ Tensor Tensor::random(const vector<size_t>& shape,double min,double max) { //Pue
     //Le añadimos lo faltante osea desplazamos min (cantidad) y asi formamos numeros aleatorios que tambien pueden ser negativos
     return Tensor(shape, values);//Retorna el tensor
 }
-//Funcion para considerar el rango
-Tensor Tensor::arange(int start, int end){
-    if (start >= end) {
-        throw invalid_argument("start debe ser menor que end.");
-    }
-    vector<double> values;
-    for (int i = start; i < end; ++i) {
-        values.push_back(i);//Pone los valores en el tensor
-    }
-    vector<size_t> shape = { values.size() };
-    return Tensor(shape, values);
-}
+
 //Getters
 size_t Tensor::get_totaln() const {
     return totaln;
@@ -325,7 +285,7 @@ Tensor Tensor::operator*(const Tensor& other) const {
     return Tensor(new_shape, result);
 }
 
-Tensor::view(const vector<size_t>& new_shape) {
+Tensor Tensor::view(const vector<size_t>& new_shape)  {
     // Validamos que no sea mas de 3 dimensiones
     if (new_shape.empty() || new_shape.size() > 3) {
         throw invalid_argument("El shape debe tener entre 1 y 3 dimensiones.");
@@ -354,14 +314,13 @@ Tensor::view(const vector<size_t>& new_shape) {
     // Dejamos el tensor original en un estado vacio
     delete[] this->shape; // Liberamos memoria
     this->shape = nullptr;
-    this->data = nullptr;
     this->dimensiones = 0;
     this->totaln = 0;
     // Retorna el nuevo tensor
     return result;
 }
 
-Tensor Tensor::unsqueeze(size_t dim) {
+Tensor Tensor::unsqueeze(size_t dim) const {
     //Verficamos dimensiones
     if (dimensiones >= 3) {
         throw invalid_argument("No se puede hacer unsqueeze, excede el maximo de 3 dimensiones.");

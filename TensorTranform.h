@@ -6,7 +6,7 @@
 class TensorTranform {
 public :// Permite aplicar una transformación al tensor actual.
 // Recibe un objeto de tipo TensorTransform (o una clase derivada)
-// y ejecuta su método apply usando polimorfismo dinámico.
+// y ejecuta su metodo apply usando polimorfismo dinámico.
 // *this representa el tensor actual que será transformado.
 // Retorna un nuevo tensor con la transformación aplicada.
 virtual Tensor apply( const Tensor & t ) const = 0;
