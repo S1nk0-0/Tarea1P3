@@ -59,7 +59,7 @@ public:
     Tensor operator*(const Tensor& other) const;
 
     //Modificacion de dimensiones
-    Tensor view(const vector<size_t>& new_shape);
+    Tensor view(const vector<size_t>& new_shape)const;
     Tensor unsqueeze(size_t dim);
 
 

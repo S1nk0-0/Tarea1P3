@@ -284,40 +284,29 @@ Tensor Tensor::operator*(const Tensor& other) const {
     return Tensor(new_shape, result);
 }
 
-Tensor Tensor::view(const vector<size_t>& new_shape)  {
-    // Validamos que no sea mas de 3 dimensiones
-    if (new_shape.empty() || new_shape.size() > 3) {
-        throw invalid_argument("El shape debe tener entre 1 y 3 dimensiones.");
+    Tensor Tensor::view(const vector<size_t>& new_shape) const {
+        // Calcular total de elementos del nuevo shape
+        size_t new_total = 1;
+
+        for (size_t i = 0; i < new_shape.size(); i++) {
+            new_total *= new_shape[i];
+        }
+
+        // Verificar que tenga la misma cantidad de elementos
+        if (new_total != totaln) {
+            throw invalid_argument("El nuevo shape no coincide con el total de elementos");
+        }
+
+        // Copiar los valores actuales
+        vector<double> values;
+
+        for (size_t i = 0; i < totaln; i++) {
+            values.push_back(data[i]);
+        }
+
+        // Crear y retornar nuevo tensor
+        return Tensor(new_shape, values);
     }
-    //Calcumaos el tamaño de el tensor que queremos
-    size_t nuevo_totaln = 1;
-    for (size_t dim : new_shape) {
-        if (dim == 0) throw invalid_argument("La dimension no puede ser 0.");
-        nuevo_totaln *= dim;
-    }
-    //Verificamos que el total de elementos sea constante
-    if (nuevo_totaln != this->totaln) {
-        throw invalid_argument("El numero total de elementos no coincide.");
-    }
-    //Creamos un tensor que luego retornaremos
-    Tensor result;
-    result.dimensiones = new_shape.size();
-    result.totaln = this->totaln;
-    //Asignamos valores a nuestro nuevo tensor que queremos
-    result.shape = new size_t[result.dimensiones];
-    for (size_t i = 0; i < result.dimensiones; ++i) {
-        result.shape[i] = new_shape[i];
-    }
-    // Accedemos al puntero : "no lo copiamos"
-    result.data = this->data;
-    // Dejamos el tensor original en un estado vacio
-    delete[] this->shape; // Liberamos memoria
-    this->shape = nullptr;
-    this->dimensiones = 0;
-    this->totaln = 0;
-    // Retorna el nuevo tensor
-    return result;
-}
 
 Tensor Tensor::unsqueeze(size_t dim) {
     //Verficamos dimensiones
@@ -467,11 +456,11 @@ Tensor matmul(const Tensor& a, const Tensor& b) {
     // validar que ambos sean 2D
 
     //Verficamos dimensiones
-    if (a.dimensiones != 2 &  b.dimensiones != 2) {
+    if (a.dimensiones != 2 ||  b.dimensiones != 2) {
         throw invalid_argument("No se puede hacer matmul, dimensiones diferentes a 2D.");
     }
     // validar que a.shape[1] == b.shape[0]
-    if (a.shape[1] != b.shape[1]) {
+    if (a.shape[1] != b.shape[0]) {
         throw invalid_argument("No se puede hacer matmul, tamanios incompatibles.");
     }
 
