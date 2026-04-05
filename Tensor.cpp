@@ -134,6 +134,54 @@ Tensor& Tensor::operator=(Tensor&& other) noexcept{
     return *this; //nos retorna el que queremos
 }
 
+// Funciones
+Tensor Tensor::zeros(const vector<size_t>& shape) {
+    size_t total = compute_total_size(shape);
+    vector<double> values(total, 0.0);
+    return Tensor(shape, values);
+}
+
+Tensor Tensor::ones(const vector<size_t>& shape) {
+    size_t total = compute_total_size(shape);
+    vector<double> values(total, 1.0);
+    return Tensor(shape, values);
+}
+
+Tensor Tensor::random(const vector<size_t>& shape, double min, double max) {
+    if (min >= max) {
+        throw invalid_argument("min debe ser menor que max.");
+    }
+
+    size_t total = compute_total_size(shape);
+    vector<double> values(total);
+
+    if (min >= 0) {
+        for (size_t i = 0; i < total; ++i) {
+            values[i] = rand() % (max-min) +min ;
+        }
+    }
+    else {
+        throw invalid_argument("min debe ser positivo.");
+    }
+
+
+    return Tensor(shape, values);
+}
+
+Tensor Tensor::arange(int start, int end) {
+    if (start >= end) {
+        throw invalid_argument("start debe ser menor que end.");
+    }
+    vector<double> values;
+
+    for (int i = start; i < end; ++i) {
+        values.push_back(i);
+    }
+
+    vector<size_t> shape = { values.size() };
+    return Tensor(shape, values);
+}
+
 // Destructor
 Tensor::~Tensor()   {
     delete[] shape; //libera memoria
