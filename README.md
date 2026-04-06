@@ -50,5 +50,5 @@ La implementación incluye:
 
 ## Main
 ### Interpretación
-Cuando se ejecuta main, se observara una tala con el numero de paso, operacion que ejecutamos y dimensiones del tensor, todo esto concuerda y cumple con la lógica
+Cuando se ejecuta main, se observara una tabla con el numero de paso, la operacion que ejecutamos y las dimensiones del tensor, todo esto concuerda y cumple con la lógica.
 
