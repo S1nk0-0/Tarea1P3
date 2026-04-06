@@ -207,27 +207,58 @@ Tensor Tensor::apply(const TensorTranform& tranform) const {
 
 }
 //Sobrecarga de Operadores
-//Sobrecarga de +
-Tensor Tensor::operator+(const Tensor& other) const {
-    // Verificar shapes que tengan las mismas dimensiones
-    if (dimensiones != other.dimensiones) {
-        throw invalid_argument("Dimensiones incompatibles.");
-    }
-    //Verificar que tenga las mismas filas columnas y en caso 3D alto
-    for (size_t i = 0; i < dimensiones; i++) {
-        if (shape[i] != other.shape[i]) {
-            throw invalid_argument("Shapes diferentes.");
+
+
+ostream& operator<<(ostream& os, const Tensor& t) {
+    for (size_t i = 0; i < t.dimensiones; ++i) {
+        os << t.shape[i];
+        if (i + 1 < t.dimensiones) {
+            os << " x ";
         }
     }
-    // Crear el resultado
-    vector<double> result(totaln);
-    // Sumar elemento a elemento
-    for (size_t i = 0; i < totaln; i++) {
-        result[i] = data[i] + other.data[i];
+    return os;
+} // lo cree para verificar las dimensiones
+Tensor Tensor::operator+(const Tensor& other) const {
+    // Caso 1: shapes exactamente iguales
+    if (dimensiones == other.dimensiones) {
+        bool iguales = true;
+        for (size_t i = 0; i < dimensiones; i++) {
+            if (shape[i] != other.shape[i]) {
+                iguales = false;
+                break;
+            }
+        }
+
+        if (iguales) {
+            vector<double> result(totaln);
+            for (size_t i = 0; i < totaln; i++) {
+                result[i] = data[i] + other.data[i];
+            }
+            vector<size_t> new_shape(shape, shape + dimensiones);
+            return Tensor(new_shape, result);
+        }
     }
-    vector<size_t> new_shape(shape, shape + dimensiones);
-    //Retornar el nuevo tensor
-    return Tensor(new_shape, result);
+
+    // Caso 2: sumas de este tipo -> (m x n) + (1 x n)
+    if (dimensiones == 2 && other.dimensiones == 2 &&
+        other.shape[0] == 1 && shape[1] == other.shape[1]) {
+
+        size_t filas = shape[0];
+        size_t columnas = shape[1];
+        vector<double> result(totaln);
+
+        for (size_t i = 0; i < filas; i++) {
+            for (size_t j = 0; j < columnas; j++) {
+                result[i * columnas + j] =
+                    data[i * columnas + j] + other.data[j];
+            }
+        }
+
+        vector<size_t> nshape(shape, shape + dimensiones);
+        return Tensor(nshape, result);
+        }
+
+    throw invalid_argument("Shapes diferentes.");
 }
 Tensor Tensor::operator-(const Tensor& other) const {
     // Verificar shapes que tengan las mismas dimensiones
