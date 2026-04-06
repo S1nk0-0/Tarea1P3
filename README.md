@@ -41,10 +41,14 @@ La implementación incluye:
   Archivo de configuración para compilación con CMake.
 
 
-## Compilación con CMake
+## Compilación
 
-### Opción 1: desde CLion
+### Desde CLion
 1. Abrir el proyecto en CLion.
 2. Esperar a que CMake cargue el proyecto.
 3. Compilar con el botón **Build** o **Run**.
+
+## Main
+### Interpretación
+Cuando se ejecuta main, se observara una tala con el numero de paso, operacion que ejecutamos y dimensiones del tensor, todo esto concuerda y cumple con la lógica
 
