@@ -3,7 +3,7 @@
 Implementación en C++ de una librería básica de tensores inspirada en bibliotecas como NumPy y PyTorch.
 
 ## Integrantes
-- Danilson
+- Denilson Jermai Cuadros Villegas
 - Ferrel Valentino Infante Garcia
 
 ## Descripción
