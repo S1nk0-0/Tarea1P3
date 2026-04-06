@@ -14,7 +14,7 @@ La implementación incluye:
 - gestión de memoria con constructor de copia, constructor de movimiento, asignación de copia, asignación de movimiento y destructor
 - transformaciones polimórficas mediante `TensorTranform`
 - funciones de activación `ReLU` y `Sigmoid`
-- sobrecarga de operadores
+- sobrecarga de operadores `+`, `-`, `*` y `<<` 
 - modificación de dimensiones con `view` y `unsqueeze`
 - concatenación con `concat`
 - funciones amigas `dot` y `matmul`
@@ -35,7 +35,7 @@ La implementación incluye:
   Implementación de la función de activación Sigmoid.
 
 - `main.cpp`  
-  Programa principal de prueba.
+  Programa principal de ejecución.
 
 - `CMakeLists.txt`  
   Archivo de configuración para compilación con CMake.
